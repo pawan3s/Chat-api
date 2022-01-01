@@ -12,7 +12,7 @@ var path = require("path");
 
 const app = express();
 
-app.use(express.json({ limit: "10kb" }));
+app.use(express.json());
 app.use(favicon(path.join(__dirname, "public", "favicon.ico")));
 
 //Data compression
@@ -30,9 +30,13 @@ app.use(cors());
 
 const homeRouter = require("./routes/homeRoutes");
 const userRouter = require("./routes/userRoutes");
+const ConversationRouter = require("./routes/conversationRoutes");
+const messageRouter = require("./routes/messageRoutes");
 
 app.use("/", homeRouter);
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/conversations", ConversationRouter);
+app.use("/api/v1/messages", messageRouter);
 
 //routes not found
 app.all("*", (req, res, next) => {

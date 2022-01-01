@@ -57,6 +57,11 @@ exports.confirmEmail = AsyncHandler(async (req, res, next) => {
 
 exports.login = AsyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
+  const userExists = await User.findOne({ email });
+  if (!userExists) {
+    return next(new AppError("Invalid Email or Password", 401));
+  }
+  // const { email, password } = req.body;
   if (!email || !password) {
     return next(new AppError("Please provide email and password", 400));
   }
@@ -69,4 +74,45 @@ exports.login = AsyncHandler(async (req, res, next) => {
     return next(new AppError("Account not verified", 403));
   }
   createSendToken(user, 200, req, res);
+});
+
+exports.protect = AsyncHandler(async (req, res, next) => {
+  let token;
+
+  // check token
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
+  }
+  if (!token) return next(new AppError("You are not logged in!", 400));
+
+  // verify token
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+  const existUser = await User.findById(decoded.id);
+
+  // check if user has activated account
+  if (existUser.isVerified === false)
+    return next(
+      new AppError(
+        "user has not activated account and can't request for any routes",
+        400
+      )
+    );
+
+  // check if user still exists
+  if (!existUser) {
+    return next(new AppError(401, "The user doesn't exist anymore!"));
+  }
+
+  // check if user changed password after the token was issued
+  // if (existUser.changedPasswordAfter(decoded.iat)) {
+  //   return next(new AppError(401, "Password has been changed !"));
+  // }
+
+  // access granted to next middleware
+  req.user = existUser;
+  next();
 });

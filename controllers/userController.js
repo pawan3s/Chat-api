@@ -109,7 +109,7 @@ exports.createUser = AsyncHandler(async (req, res, next) => {
 
 exports.getAllUsers = AsyncHandler(async (req, res, next) => {
   // To allow for nested GET reviews on tour (hack)
-  let filter = {};
+  let filter = { isVerified: true };
 
   const features = new APIServices(User.find(filter), req.query)
     .filter()

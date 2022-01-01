@@ -4,10 +4,7 @@ const authController = require("../controllers/authController");
 
 const router = express.Router();
 
-router
-  .route("/")
-  .get(userController.getAllUsers)
-  .post(userController.createUser);
+router.route("/").get(userController.getAllUsers);
 
 router
   .route("/:id")
@@ -16,5 +13,6 @@ router
 
 router.route("/confirmation/:email/:token").get(authController.confirmEmail);
 router.route("/login").post(authController.login);
+router.route("/register").post(userController.createUser);
 
 module.exports = router;
