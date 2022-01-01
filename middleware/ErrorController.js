@@ -4,7 +4,7 @@ module.exports = (err, req, res, next) => {
   let error = { ...err };
   error.message = err.message;
 
-  //Mongoose ObjectID not found
+  //Mongoose Objectid not found
   if (err.name === "CastError") {
     const message = `Invalid ${error.path}:${error.value}`;
     error = new AppError(message, 404);
