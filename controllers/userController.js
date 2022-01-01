@@ -68,7 +68,10 @@ exports.createUser = AsyncHandler(async (req, res, next) => {
   });
   user.save((err) => {
     if (err) {
-      return res.status(500).send({ msg: err.message });
+      if (err.code === 11000) {
+        return next(new AppError("Username already Exists.", 500));
+      }
+      return next(new AppError(err.message, 500));
     }
     const token = new Token({
       userID: user._id,
@@ -76,7 +79,7 @@ exports.createUser = AsyncHandler(async (req, res, next) => {
     });
     token.save(async (err) => {
       if (err) {
-        return res.status(500).send({ msg: err.message, err });
+        return next(new AppError(err.message, 500));
       }
       const message = `Hello ${req.body.username},\n\nPlease verify your account by clicking the link: \nhttp://${req.headers.host}/api/v1/users/confirmation/${user.email}/${token.token}\n\nThank You!! \n Pawan Subedi`;
       try {
@@ -85,19 +88,20 @@ exports.createUser = AsyncHandler(async (req, res, next) => {
           subject: "Account Verification Link",
           message,
         });
-        res
-          .status(200)
-          .send(
-            "A verification email has been sent to " +
-              user.email +
-              ". Please click on link to verify"
-          );
-      } catch (error) {
-        res.status(500).send({
-          status: "failed",
-          msg: "Technical isse! Couldnot send email.",
-          error,
+        res.status(200).json({
+          status: "success",
+          msg:
+            "Resgistration Successful!! A verification email has been sent to " +
+            user.email +
+            ". Please click on link to verify.",
         });
+      } catch (error) {
+        return next(
+          new AppError(
+            "Technical Issue!! Couldnot send mail, Please try again",
+            500
+          )
+        );
       }
     });
   });
