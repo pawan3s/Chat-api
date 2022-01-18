@@ -3,9 +3,10 @@ const router = express.Router();
 const messageController = require("../controllers/messageController");
 const authController = require("../controllers/authController");
 
+router.route("/").post(authController.protect, messageController.createMessage);
+
 router
-  .route("/")
-  .get(authController.protect, messageController.getAllMessages)
-  .post(authController.protect, messageController.createMessage);
+  .route("/:id")
+  .get(authController.protect, messageController.getAllMessages);
 
 module.exports = router;

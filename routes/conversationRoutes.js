@@ -5,7 +5,10 @@ const authController = require("../controllers/authController");
 
 router
   .route("/")
-  .get(authController.protect, conversationController.getMyConversations)
   .post(authController.protect, conversationController.createConversation);
+
+router
+  .route("/:userId")
+  .get(authController.protect, conversationController.getMyConversations);
 
 module.exports = router;

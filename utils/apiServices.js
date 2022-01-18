@@ -11,8 +11,11 @@ class APIServices {
 
     // 1B) Advanced filtering
     let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
-
+    queryStr = queryStr.replace(
+      /\b(gte|gt|lte|lt|ne)\b/g,
+      (match) => `$${match}`
+    );
+    console.log(queryStr);
     this.query = this.query.find({
       ...JSON.parse(queryStr),
       ...preDefinedFilter,
@@ -50,12 +53,11 @@ class APIServices {
 
     this.query = this.query.skip(skip).limit(limit);
 
-        return this;
-    }
-    populate(model){
-        this.query=this.query.populate(model)
-        return this;
-    }
-   
+    return this;
+  }
+  populate(model) {
+    this.query = this.query.populate(model);
+    return this;
+  }
 }
 module.exports = APIServices;

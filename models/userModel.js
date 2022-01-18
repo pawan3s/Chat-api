@@ -11,6 +11,12 @@ const userSchema = new mongoose.Schema(
       max: 20,
       unique: [true, "Please provide a unique username"],
     },
+    full_Name: {
+      type: String,
+      required: [true, "Please enter your fullName!"],
+      min: 3,
+      max: 20,
+    },
     email: {
       type: String,
       required: [true, "Please provide your email"],
