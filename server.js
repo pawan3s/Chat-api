@@ -1,14 +1,15 @@
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 dotenv.config();
-const http = require("http");
-const socketIO = require("socket.io");
+const { createServer } = require("http");
+const socketio = require("socket.io");
 
 const app = require("./app");
 
-const server = http.Server(app);
-const io = socketIO(server, {
-  cors: { origin: "https://faith-chat-9620f.web.app/" },
+const server = createServer(app);
+// const io = socketio(server, { cors: { origin: "http://localhost:3000" } });
+const io = socketio(server, {
+  cors: { origin: "https://faith-chat-9620f.web.app" },
 });
 
 //Database
