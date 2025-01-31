@@ -7,19 +7,16 @@ const socketio = require("socket.io");
 const app = require("./app");
 
 const server = createServer(app);
-// const io = socketio(server, { cors: { origin: "http://localhost:3000" } });
-const io = socketio(server, {
-  cors: { origin: "https://faith-chat-9620f.web.app" },
-});
-
+const io = socketio(server, { cors: { origin: "http://localhost:3000" } });
+// const io = socketio(server, {
+//   cors: { origin: "https://faith-chat-9620f.web.app" },
+// });
+mongoose.set("strictQuery", false); 
 //Database
 const DB = process.env.DATABASE_URI;
+
 mongoose
-  .connect(DB, {
-    keepAlive: true,
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(DB)
   .then(() => {
     console.log("Connected to Database Successfully!");
   })

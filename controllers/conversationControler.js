@@ -1,7 +1,7 @@
 const Conversation = require("../models/conversationModel");
 const User = require("../models/userModel");
 const AsyncHandler = require("../utils/asyncHandler");
-const AppError = require("../utils/AppError");
+const AppError = require("../utils/appError");
 
 exports.createConversation = AsyncHandler(async (req, res, next) => {
   if (!req.body.senderId || !req.body.receiverId)

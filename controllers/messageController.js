@@ -1,7 +1,7 @@
 const Message = require("../models/mesaageModel");
 const Conversation = require("../models/conversationModel");
 const AsyncHandler = require("../utils/asyncHandler");
-const AppError = require("../utils/AppError");
+const AppError = require("../utils/appError");
 
 exports.createMessage = AsyncHandler(async (req, res, next) => {
   const message = await Message.create({
