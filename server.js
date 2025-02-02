@@ -7,7 +7,7 @@ const socketio = require("socket.io");
 const app = require("./app");
 
 const server = createServer(app);
-const io = socketio(server, { cors: { origin: "http://localhost:3000" } });
+const io = socketio(server, { cors: { origin: process.env.ORIGIN } });
 // const io = socketio(server, {
 //   cors: { origin: "https://faith-chat-9620f.web.app" },
 // });
