@@ -1,7 +1,7 @@
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 dotenv.config();
-const { createServer } = require("http");
+const { createServer } = require("https");
 const socketio = require("socket.io");
 
 const app = require("./app");
