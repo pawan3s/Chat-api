@@ -67,45 +67,43 @@ exports.createUser = AsyncHandler(async (req, res, next) => {
     email: req.body.email,
     password: hashedPassword,
   });
-  user.save((err) => {
-    if (err) {
-      if (err.code === 11000) {
-        return next(new AppError("Username already Exists.", 500));
-      }
-      return next(new AppError(err.message, 500));
+
+  try {
+    // Save user (awaiting the Promise)
+    user = await user.save();
+  } catch (err) {
+    if (err.code === 11000) {
+      return next(new AppError("Username already exists.", 500));
     }
-    const token = new Token({
-      userID: user._id,
-      token: crypto.randomBytes(16).toString("hex"),
-    });
-    token.save(async (err) => {
-      if (err) {
-        return next(new AppError(err.message, 500));
-      }
-      const message = `Hello ${req.body.username},\n\nPlease verify your account by clicking the link: \nhttp://${req.headers.host}/api/v1/users/confirmation/${user.email}/${token.token}\n\nThank You!! \n Pawan Subedi`;
-      try {
-        await sendEmail({
-          email: user.email,
-          subject: "Account Verification Link",
-          message,
-        });
-        res.status(200).json({
-          status: "success",
-          msg:
-            "Resgistration Successful!! A verification email has been sent to " +
-            user.email +
-            ". Please click on link to verify.",
-        });
-      } catch (error) {
-        return next(
-          new AppError(
-            "Technical Issue!! Couldnot send mail, Please try again",
-            500
-          )
-        );
-      }
-    });
+    return next(new AppError(err.message, 500));
+  }
+
+  // Generate verification token
+  const token = new Token({
+    userID: user._id,
+    token: crypto.randomBytes(16).toString("hex"),
   });
+    try {
+      // Save token
+      await token.save();
+  
+      // Email message
+      const message = `Hello ${username},\n\nPlease verify your account by clicking the link: \nhttp://${req.headers.host}/api/v1/users/confirmation/${email}/${token.token}\n\nThank You!! \n Pawan Subedi`;
+  
+      // Send verification email
+      await sendEmail({
+        email,
+        subject: "Account Verification Link",
+        message,
+      });
+  
+      res.status(200).json({
+        status: "success",
+        msg: `Registration Successful! A verification email has been sent to ${email}. Please click on the link to verify.`,
+      });
+    } catch (error) {
+      return next(new AppError("Technical Issue! Could not send email. Contact Admin to activate your account", 500));
+    }
 });
 
 //@get all users
