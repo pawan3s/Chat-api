@@ -7,10 +7,10 @@ const socketio = require("socket.io");
 const app = require("./app");
 
 const server = createServer(app);
-const io = socketio(server, { cors: { origin: process.env.ORIGIN } });
-// const io = socketio(server, {
-//   cors: { origin: "https://faith-chat-9620f.web.app" },
-// });
+// const io = socketio(server, { cors: { origin: process.env.NODE_ENV=="development" ? process.env.ORIGIN_DEV :process.env.ORIGIN_PROD} });
+const io = socketio(server, {
+  cors: { origin: "https://faith-chat-9620f.web.app" },
+});
 mongoose.set("strictQuery", false); 
 //Database
 const DB = process.env.DATABASE_URI;
@@ -33,8 +33,16 @@ server.listen(PORT, () => {
 let users = [];
 
 const addUser = (userId, socketId) => {
-  !users.some((user) => user.userId === userId) &&
-    users.push({ userId, socketId });
+  const existingUser = users.find((user) => user.userId === userId);
+  if (existingUser) {
+    existingUser.socketId = socketId; // Update socket ID if user reconnects
+  } else {
+    users.push({ userId, socketId }); // Add new user if not in list
+  }
+//  if (!users.some((user) => user.userId === userId)){
+//   users.push({ userId, socketId });
+//  }
+//  console.log("Users:", users);
 };
 
 const removeUser = (socketid) => {
@@ -45,9 +53,11 @@ const getUser = (userId) => {
   return users.find((user) => user.userId === userId);
 };
 
+
+
 io.on("connection", (socket) => {
   //when connected
-  console.log("a user conected");
+  console.log(`a user conected: ${socket.id}`);
   socket.on("addUser", (userId) => {
     addUser(userId, socket.id);
     io.emit("getUsers", users);
@@ -62,6 +72,29 @@ io.on("connection", (socket) => {
     });
   });
 
+  socket.on("callUser", (data) => {
+    const userToCall = users.find((user) => user.userId === data.userToCall);
+    if (userToCall) {
+      console.log(`Calling ${userToCall.userId} at ${userToCall.socketId}`);
+      io.to(userToCall.socketId).emit("hey", {
+        signal: data.signalData,
+        from: data.from,
+      });
+    }
+    // io.to(data.userToCall).emit("hey", {
+    //   signal: data.signalData,
+    //   from: data.from,
+    // });
+  });
+
+  socket.on("acceptCall", (data) => {
+    const user = users.find((user) => user.userId === data.to);
+    if (user) {
+      io.to(user.socketId).emit("callAccepted", data.signal);
+    }
+    // io.to(data.to).emit("callAccepted", data.signal);
+  });
+
   //when disconnected
   socket.on("disconnect", () => {
     console.log("a user disconnected");
@@ -69,3 +102,5 @@ io.on("connection", (socket) => {
     io.emit("getUsers", users);
   });
 });
+
+
